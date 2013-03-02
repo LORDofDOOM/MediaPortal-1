@@ -99,6 +99,17 @@ namespace MediaPortal.GUI.Video
       return Load(GUIGraphicsContext.GetThemedSkinFile(@"\myvideoTitle.xml"));
     }
 
+    public override bool OnMessage(GUIMessage message)
+    {
+      switch (message.Message)
+      {
+        case GUIMessage.MessageType.GUI_MSG_PLAY_BD:
+          GUIVideoFiles.PlayMovieFromBDPlayList(true, -1, true);
+          break;
+      }
+      return base.OnMessage(message);
+    }
+
     protected override string SerializeName
     {
       get { return "myvideo" + handler.CurrentView; }
