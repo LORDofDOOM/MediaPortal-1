@@ -140,7 +140,6 @@ namespace MediaPortal.Player
 
       using (Settings xmlreader = new MPSettings())
       {
-
         // get pre-defined filter setup
         filterConfig.bAutoDecoderSettings = xmlreader.GetValueAsBool("movieplayer", "autodecodersettings", false);
         filterConfig.bForceSourceSplitter = xmlreader.GetValueAsBool("movieplayer", "forcesourcesplitter", false);
@@ -167,6 +166,36 @@ namespace MediaPortal.Player
           if (xmlreader.GetValueAsBool("movieplayer", "usefilter" + i, false))
           {
             filterConfig.OtherFilters.Add(xmlreader.GetValueAsString("movieplayer", "filter" + i, "undefined"));
+          }
+          i++;
+        }
+      }
+      return filterConfig;
+    }
+
+    protected virtual FilterConfig GetFilterConfigurationBD()
+    {
+      using (Settings xmlreader = new MPSettings())
+      {
+        // get BD Audio/Video Codec configuration settings
+        filterConfig.Video = xmlreader.GetValueAsString("bdplayer", "mpeg2videocodec", "");
+        filterConfig.Audio = xmlreader.GetValueAsString("bdplayer", "mpeg2audiocodec", "");
+        filterConfig.VideoH264 = xmlreader.GetValueAsString("bdplayer", "h264videocodec", "");
+        filterConfig.VideoVC1 = xmlreader.GetValueAsString("bdplayer", "vc1videocodec", "");
+        filterConfig.VideoVC1I = xmlreader.GetValueAsString("bdplayer", "vc1videocodec", "");
+        filterConfig.AudioRenderer = xmlreader.GetValueAsString("bdplayer", "audiorenderer",
+                                                                "Default DirectSound Device");
+
+        // Clear Post Process filter.
+        filterConfig.OtherFilters.Clear();
+
+        // get BD post-processing filter setup
+        int i = 0;
+        while (xmlreader.GetValueAsString("bdplayer", "filter" + i, "undefined") != "undefined")
+        {
+          if (xmlreader.GetValueAsBool("bdplayer", "usefilter" + i, false))
+          {
+            filterConfig.OtherFilters.Add(xmlreader.GetValueAsString("bdplayer", "filter" + i, "undefined"));
           }
           i++;
         }
@@ -524,7 +553,10 @@ namespace MediaPortal.Player
         }
 
         if (extension == ".mpls" || extension == ".bdmv")
+        {
           filterConfig.bForceSourceSplitter = false;
+          filterConfig = GetFilterConfigurationBD();
+        }
 
         if (filterConfig.strsplitterfilter == LAV_SPLITTER_FILTER_SOURCE && filterConfig.bForceSourceSplitter)
         {
