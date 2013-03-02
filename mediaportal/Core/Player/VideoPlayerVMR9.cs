@@ -533,10 +533,28 @@ namespace MediaPortal.Player
         //Get video/audio Info
         _mediaInfo = new MediaInfoWrapper(m_strCurrentFile);
 
+        GUIMessage msg;
+        if (extension == ".mpls" || extension == ".bdmv")
+        {
+          filterConfig.bForceSourceSplitter = false;
+          filterConfig = GetFilterConfigurationBD();
+
+          // Ask for resume for BD
+          msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
+          GUIWindowManager.SendMessage(msg);
+          if (g_Player.SetResumeBDTitleState == -1)
+          {
+            // user cancelled dialog
+            g_Player.Stop();
+            Cleanup();
+            return true;
+          }
+        }
+
         //Manually add codecs based on file extension if not in auto-settings
         // switch back to directx fullscreen mode
         Log.Info("VideoPlayer9: Enabling DX9 exclusive mode");
-        GUIMessage msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_SWITCH_FULL_WINDOWED, 0, 0, 0, 1, 0, null);
+        msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_SWITCH_FULL_WINDOWED, 0, 0, 0, 1, 0, null);
         GUIWindowManager.SendMessage(msg);
 
         // add the VMR9 in the graph

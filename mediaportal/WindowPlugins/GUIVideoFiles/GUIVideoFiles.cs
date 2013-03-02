@@ -1758,7 +1758,7 @@ namespace MediaPortal.GUI.Video
       int timeMovieStopped = 0;
       byte[] resumeData = null;
 
-      if (!_BDInternalMenu || !_BDDetect)
+      if (!_BDInternalMenu && !_BDDetect)
       {
         // Skip resume for external player and BluRays (not implemented yet in BDLIB)
         if (!CheckExternalPlayer(filename, isImage))
