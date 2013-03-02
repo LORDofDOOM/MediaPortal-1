@@ -2520,6 +2520,12 @@ namespace MediaPortal.Player
             msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
             msg.Label = filename;
             GUIWindowManager.SendMessage(msg);
+            if (g_Player.SetResumeBDTitleState == -1)
+            {
+              // user cancelled dialog
+              g_Player.Stop();
+              return false;
+            }
           }
           else
           {
