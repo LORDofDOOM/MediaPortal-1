@@ -121,6 +121,7 @@ namespace MediaPortal.Video.Database
     int AddMovie(string strFilenameAndPath, bool bHassubtitles);
     void GetMovies(ref ArrayList movies);
     int GetMovieId(string strFilenameAndPath);
+    int GetTitleBDId(int iFileId, out byte[] resumeData);
     bool HasSubtitle(string strFilenameAndPath);
     void SetThumbURL(int lMovieId, string thumbURL);
     

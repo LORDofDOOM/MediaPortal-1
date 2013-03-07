@@ -460,6 +460,11 @@ namespace MediaPortal.Video.Database
       return _database.GetMovieId(strFilenameAndPath);
     }
 
+    public static int GetTitleBDId(int iFileId, out byte[] resumeData)
+    {
+      return _database.GetTitleBDId(iFileId, out resumeData);
+    }
+
     public static bool HasSubtitle(string strFilenameAndPath)
     {
       return _database.HasSubtitle(strFilenameAndPath);

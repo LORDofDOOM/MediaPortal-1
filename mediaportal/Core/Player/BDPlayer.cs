@@ -840,9 +840,9 @@ namespace MediaPortal.Player
       if (!File.Exists(strFile))
       {
         return false;
-      }      
+      }
 
-      if (!GetInterfaces(strFile))
+      if (!GetInterfaces(strFile, g_Player.SetResumeBDTitleState))
       {
         MovieEnded();
 
@@ -2461,7 +2461,7 @@ namespace MediaPortal.Player
       }
     }
 
-    protected bool GetInterfaces(string filename)
+    protected bool GetInterfaces(string filename, int titleBD)
     {
       try
       {
@@ -2509,39 +2509,34 @@ namespace MediaPortal.Player
 
         while (true)
         {
-          if (titles.Count == 1)
+          if (g_Player.ForcePlay)
           {
-            // BD has only one title (remux one)
-            _forceTitle = true;
-            _titleToPlay = 0;
-
-            // Send msg to ask resume for the title selected
-            GUIMessage msg = null;
-            msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
-            msg.Label = filename;
-            GUIWindowManager.SendMessage(msg);
-            if (g_Player.SetResumeBDTitleState == -1)
+            if (titles.Count == 1)
             {
-              // user cancelled dialog
-              g_Player.Stop();
-              return false;
+              _titleToPlay = 0;
             }
+            else
+            {
+              _titleToPlay = g_Player.SetResumeBDTitleState;
+            }
+            _forceTitle = true;
+            g_Player.ForcePlay = false;
           }
           else
           {
-            _titleToPlay = SelectTitle(titles);
-            g_Player.SetResumeBDTitleState = _titleToPlay;
-            Log.Info("BDPlayer: BDReader _titleToPlay : {0}", _titleToPlay);
-            if (_titleToPlay > -1)
+            if (titles.Count == 1)
             {
-              // a specific title was selected
+              // BD has only one title (remux one)
               _forceTitle = true;
+              _titleToPlay = 0;
 
-              // Send msg to ask resume for the title selected
-              GUIMessage msg = null;
-              msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
-              msg.Label = filename;
-              GUIWindowManager.SendMessage(msg);
+              //// Send msg to ask resume for the title selected
+              //GUIMessage msg = null;
+              //msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
+              //msg.Label = filename;
+              //msg.Param1 = g_Player.SetResumeBDTitleState;
+              //GUIWindowManager.SendMessage(msg);
+
               if (g_Player.SetResumeBDTitleState == -1)
               {
                 // user cancelled dialog
@@ -2551,15 +2546,40 @@ namespace MediaPortal.Player
             }
             else
             {
-              if (_titleToPlay == -1)
+              _titleToPlay = SelectTitle(titles);
+              g_Player.SetResumeBDTitleState = _titleToPlay;
+              Log.Info("BDPlayer: BDReader _titleToPlay : {0}", _titleToPlay);
+              if (_titleToPlay > -1)
               {
-                // user cancelled dialog
-                g_Player.Stop();
-                return false;
-              }
+                // a specific title was selected
+                _forceTitle = true;
 
-              // user choose to display menu
-              _forceTitle = false;
+                //// Send msg to ask resume for the title selected
+                //GUIMessage msg = null;
+                //msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
+                //msg.Label = filename;
+                //msg.Param1 = g_Player.SetResumeBDTitleState;
+                //GUIWindowManager.SendMessage(msg);
+
+                if (g_Player.SetResumeBDTitleState == -1)
+                {
+                  // user cancelled dialog
+                  g_Player.Stop();
+                  return false;
+                }
+              }
+              else
+              {
+                if (_titleToPlay == -1)
+                {
+                  // user cancelled dialog
+                  g_Player.Stop();
+                  return false;
+                }
+
+                // user choose to display menu
+                _forceTitle = false;
+              }
             }
           }
 

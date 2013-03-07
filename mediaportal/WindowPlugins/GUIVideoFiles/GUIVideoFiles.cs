@@ -1712,6 +1712,7 @@ namespace MediaPortal.GUI.Video
     public static void PlayMovieFromPlayList(bool askForResumeMovie, int iMovieIndex, bool requestPin)
     {
       _BDDetect = false;
+      g_Player.ForcePlay = false;
       g_Player.SetResumeBDTitleState = 1000;
       string filename;
       if (iMovieIndex == -1)
@@ -1758,7 +1759,6 @@ namespace MediaPortal.GUI.Video
       int timeMovieStopped = 0;
       byte[] resumeData = null;
 
-      if (!_BDInternalMenu && !_BDDetect)
       {
         // Skip resume for external player and BluRays (not implemented yet in BDLIB)
         if (!CheckExternalPlayer(filename, isImage))
@@ -1773,6 +1773,10 @@ namespace MediaPortal.GUI.Video
           int idFile = VideoDatabase.GetFileId(filename);
           int idMovie = VideoDatabase.GetMovieId(filename);
 
+          if (_BDDetect)
+            g_Player.SetResumeBDTitleState = VideoDatabase.GetTitleBDId(idFile, out resumeData);
+
+
           if ((idMovie >= 0) && (idFile >= 0))
           {
             timeMovieStopped = VideoDatabase.GetMovieStopTimeAndResumeData(idFile, out resumeData,
@@ -1785,14 +1789,24 @@ namespace MediaPortal.GUI.Video
               {
                 title = movieDetails.Title;
               }
-              if (askForResumeMovie)
+              if (askForResumeMovie && g_Player.SetResumeBDTitleState >= 0)
               {
+                if (_BDDetect)
+                  g_Player.ForcePlay = true;
+
                 GUIResumeDialog.Result result =
                   GUIResumeDialog.ShowResumeDialog(title, timeMovieStopped,
                                                    GUIResumeDialog.MediaType.Video);
 
                 if (result == GUIResumeDialog.Result.Abort)
-                  return;
+                {
+                  g_Player.ForcePlay = false;
+                  timeMovieStopped = 0;
+                  if (!_BDDetect)
+                  {
+                    return;
+                  }
+                }
 
                 if (result == GUIResumeDialog.Result.PlayFromBeginning)
                   timeMovieStopped = 0;

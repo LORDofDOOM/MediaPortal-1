@@ -775,6 +775,30 @@ namespace MediaPortal.Video.Database
       return -1;
     }
 
+    public int GetTitleBDId(int iFileId, out byte[] resumeData)//, int bdtitle)
+    {
+      resumeData = null;
+
+      try
+      {
+        string sql = String.Format("SELECT * FROM resume WHERE idFile={0}", iFileId);// bdtitle);
+        SQLiteResultSet results = m_db.Execute(sql);
+        int BDTileID;
+
+        if (results.Rows.Count != 0)
+        {
+          Int32.TryParse(DatabaseUtility.Get(results, 0, "bdtitle"), out BDTileID);
+          return BDTileID;
+        }
+      }
+      catch (Exception ex)
+      {
+        Log.Error("videodatabase exception err:{0} stack:{1}", ex.Message, ex.StackTrace);
+        Open();
+      }
+      return 0;
+    }
+
     public int AddMovieFile(string strFile)
     {
       bool bHassubtitles = false;
@@ -2951,7 +2975,11 @@ namespace MediaPortal.Video.Database
     {
       try
       {
-        string sql = String.Format("SELECT * FROM resume WHERE idFile={0} AND bdtitle={1}", iFileId, bdtitle);
+        // The next line is too enable record of stoptime for each Title BD
+        //string sql = String.Format("SELECT * FROM resume WHERE idFile={0} AND bdtitle={1}", iFileId, bdtitle);
+
+        // Only store stoptime with one current Title BD
+        string sql = String.Format("SELECT * FROM resume WHERE idFile={0}", iFileId);
         SQLiteResultSet results = m_db.Execute(sql);
 
         string resumeString = "-";
@@ -2961,10 +2989,24 @@ namespace MediaPortal.Video.Database
           resumeString = ToHexString(resumeData);
         }
         
+        //if (results.Rows.Count != 0)
+        //{
+        //  sql = String.Format("UPDATE resume SET stoptime={0},resumeData='{1}' WHERE idFile={2} AND bdtitle={3}",
+        //                      stoptime, resumeString, iFileId, bdtitle);
+        //}
+        //else if (bdtitle >= 0)
+        //{
+        //  sql =
+        //    String.Format(
+        //      "INSERT INTO resume ( idResume,idFile,stoptime,resumeData,bdtitle) VALUES(NULL,{0},{1},'{2}',{3})",
+        //      iFileId, stoptime, resumeString, bdtitle);
+        //}
+
+        // Only store stoptime with one current Title BD
         if (results.Rows.Count != 0)
         {
-          sql = String.Format("UPDATE resume SET stoptime={0},resumeData='{1}' WHERE idFile={2} AND bdtitle={3}",
-                              stoptime, resumeString, iFileId, bdtitle);
+          sql = String.Format("UPDATE resume SET stoptime={0},resumeData='{1}',bdtitle='{2}' WHERE idFile={3}",
+                              stoptime, resumeString, bdtitle, iFileId);
         }
         else if (bdtitle >= 0)
         {
@@ -3347,7 +3389,7 @@ namespace MediaPortal.Video.Database
     {
       int lPathId;
       int lMovieId;
-      
+
       if (GetFile(strFilenameAndPath, out lPathId, out lMovieId, bExact) < 0)
       {
         return -1;

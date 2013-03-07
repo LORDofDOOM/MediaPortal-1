@@ -538,17 +538,6 @@ namespace MediaPortal.Player
         {
           filterConfig.bForceSourceSplitter = false;
           filterConfig = GetFilterConfigurationBD();
-
-          // Ask for resume for BD
-          msg = new GUIMessage(GUIMessage.MessageType.GUI_MSG_PLAY_BD, 0, 0, 0, 0, 0, null);
-          GUIWindowManager.SendMessage(msg);
-          if (g_Player.SetResumeBDTitleState == -1)
-          {
-            // user cancelled dialog
-            g_Player.Stop();
-            Cleanup();
-            return true;
-          }
         }
 
         //Manually add codecs based on file extension if not in auto-settings
@@ -568,12 +557,6 @@ namespace MediaPortal.Player
         else
         {
           AudioOnly = true;
-        }
-
-        if (extension == ".mpls" || extension == ".bdmv")
-        {
-          filterConfig.bForceSourceSplitter = false;
-          filterConfig = GetFilterConfigurationBD();
         }
 
         if (filterConfig.strsplitterfilter == LAV_SPLITTER_FILTER_SOURCE && filterConfig.bForceSourceSplitter)

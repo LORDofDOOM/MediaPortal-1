@@ -93,6 +93,7 @@ namespace MediaPortal.Player
     private static string _currentTitle = ""; //actual program metadata - usefull for tv - avoids extra DB lookups
     private static bool _pictureSlideShow = false;
     private static bool _picturePlaylist = false;
+    private static bool _forceplay = false;
 
     private static string _currentDescription = "";
     //actual program metadata - usefull for tv - avoids extra DB Lookups. 
@@ -1258,18 +1259,23 @@ namespace MediaPortal.Player
 
     public static bool Play(string strFile, MediaType type)
     {
-      return Play(strFile, type, (TextReader)null, false);
+      return Play(strFile, type, (TextReader)null, false, 1000, false);
+    }
+
+    public static bool Play(string strFile, MediaType type, int title, bool forcePlay)
+    {
+      return Play(strFile, type, (TextReader)null, false, title, forcePlay);
     }
 
     public static bool Play(string strFile, MediaType type, string chapters)
     {
       using (var stream = String.IsNullOrEmpty(chapters) ? null : new StringReader(chapters))
       {
-        return Play(strFile, type, stream, false);
+        return Play(strFile, type, stream, false, 0, false);
       }
     }
 
-    public static bool Play(string strFile, MediaType type, TextReader chapters, bool fromPictures)
+    public static bool Play(string strFile, MediaType type, TextReader chapters, bool fromPictures, int title, bool forcePlay)
     {
       try
       {
@@ -1278,6 +1284,8 @@ namespace MediaPortal.Player
           Log.Error("g_Player.Play() called without file attribute");
           return false;
         }
+
+        g_Player.SetResumeBDTitleState = title;
 
         IsPicture = false;
         bool AskForRefresh = true;
@@ -1341,6 +1349,15 @@ namespace MediaPortal.Player
             {
               return true;
             }
+          }
+          // Set bool to know if video if we force play
+          if (forcePlay)
+          {
+            ForcePlay = true;
+          }
+          else
+          {
+            ForcePlay = false;
           }
         }
 
@@ -1478,6 +1495,15 @@ namespace MediaPortal.Player
             IsPicture = true;
           }
 
+          // Set bool to know if video if we force play
+          if (forcePlay)
+          {
+            ForcePlay = true;
+          }
+          else
+          {
+            ForcePlay = false;
+          }
           return bResult;
         }
       }
@@ -1546,6 +1572,18 @@ namespace MediaPortal.Player
       set
       {
         _picturePlaylist = value;
+      }
+    }
+
+    public static bool ForcePlay
+    {
+      get
+      {
+        return _forceplay;
+      }
+      set
+      {
+        _forceplay = value;
       }
     }
 

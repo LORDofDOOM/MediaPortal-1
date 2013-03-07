@@ -124,7 +124,7 @@ namespace MediaPortal.GUI.Pictures
         _loadVideoPlayback = true;
 
         g_Player.Stop();
-        g_Player.Play(slideFilePath, g_Player.MediaType.Video, null, true);
+        g_Player.Play(slideFilePath, g_Player.MediaType.Video, null, true, 0, false);
         g_Player.ShowFullScreenWindow();
 
         if (_isSlideShow)
@@ -422,7 +422,9 @@ namespace MediaPortal.GUI.Pictures
 
         case GUIMessage.MessageType.GUI_MSG_WINDOW_DEINIT:
           if (!_returnedFromVideoPlayback && !_loadVideoPlayback)
+          {
             Reset();
+          }
           GUIGraphicsContext.Overlay = _showOverlayFlag;
           break;
 
@@ -798,6 +800,7 @@ namespace MediaPortal.GUI.Pictures
       {
         resumePausedMusic();
       }
+
       //Log.Info("Render:{0} {1} {2}", timePassed, _renderTimer, _frameCounter);
       if (!_isPaused && !_isPictureZoomed)
       {
